@@ -65,15 +65,16 @@ case $option in
             read -p "Please input frp server dashboard password: " frp_server_dashboard_password
         fi
         cd /var/frp/conf
-        echo "bindPort = $frp_server_port" > $frp_server_name.toml
-        echo "auth.token = $frp_server_token" >> $frp_server_name.toml
+        echo "[common]" > $frp_server_name.ini
+        echo "bindPort = $frp_server_port" > $frp_server_name.ini
+        echo "token = $frp_server_token" >> $frp_server_name.ini
         if [ $frp_server_dashboard == "y" ]; then
-            echo "webServer.addr = 0.0.0.0" >> $frp_server_name.toml
-            echo "webServer.port = $frp_server_dashboard_port" >> $frp_server_name.toml
-            echo "webServer.user = $frp_server_dashboard_user" >> $frp_server_name.toml
-            echo "webServer.password = $frp_server_dashboard_password" >> $frp_server_name.toml
+            echo "webServer.addr = 0.0.0.0" >> $frp_server_name.ini
+            echo "webServer.port = $frp_server_dashboard_port" >> $frp_server_name.ini
+            echo "webServer.user = $frp_server_dashboard_user" >> $frp_server_name.ini
+            echo "webServer.password = $frp_server_dashboard_password" >> $frp_server_name.ini
         fi
-        echo "Configuration file created at /var/frp/conf/$frp_server_name.toml"
+        echo "Configuration file created at /var/frp/conf/$frp_server_name.ini"
         echo "Create a service for frp server..."
         echo "[Unit]" > /etc/systemd/system/frps-$frp_server_name.service
         echo "Description = frp server for $frp_server_name" >> /etc/systemd/system/frps-$frp_server_name.service
@@ -81,7 +82,7 @@ case $option in
         echo "Wants = network.target" >> /etc/systemd/system/frps-$frp_server_name.service
         echo "[Service]" >> /etc/systemd/system/frps-$frp_server_name.service
         echo "Type = simple" >> /etc/systemd/system/frps-$frp_server_name.service
-        echo "ExecStart = /var/frp/frps -c /var/frp/conf/$frp_server_name.toml" >> /etc/systemd/system/frps-$frp_server_name.service
+        echo "ExecStart = /var/frp/frps -c /var/frp/conf/$frp_server_name.ini" >> /etc/systemd/system/frps-$frp_server_name.service
         echo "Restart = on-failure" >> /etc/systemd/system/frps-$frp_server_name.service
         echo "RestartSec = 3" >> /etc/systemd/system/frps-$frp_server_name.service
         echo "[Install]" >> /etc/systemd/system/frps-$frp_server_name.service
@@ -107,10 +108,11 @@ case $option in
         read -p "Plase input frp server token: " frp_server_token
         echo "Setting up..."
         cd /var/frp/conf
-        echo "webServer.addr = $frp_server_addr" > frpc.toml
-        echo "webServer.port = $frp_server_port" >> frpc.toml
-        echo "auth.token = $frp_server_token" >> frpc.toml
-        echo "Configuration file created at /var/frp/conf/frpc.toml"
+        echo "[common]" > frpc.ini
+        echo "server_addr = $frp_server_addr" > frpc.ini
+        echo "server_port = $frp_server_port" >> frpc.ini
+        echo "token = $frp_server_token" >> frpc.ini
+        echo "Configuration file created at /var/frp/conf/frpc.ini"
         echo "Create a service for frp client..."
         echo "[Unit]" > /etc/systemd/system/frpc.service
         echo "Description = frp client" >> /etc/systemd/system/frpc.service
@@ -118,7 +120,7 @@ case $option in
         echo "Wants = network.target" >> /etc/systemd/system/frpc.service
         echo "[Service]" >> /etc/systemd/system/frpc.service
         echo "Type = simple" >> /etc/systemd/system/frpc.service
-        echo "ExecStart = /var/frp/frpc -c /var/frp/conf/frpc.toml" >> /etc/systemd/system/frpc.service
+        echo "ExecStart = /var/frp/frpc -c /var/frp/conf/frpc.ini" >> /etc/systemd/system/frpc.service
         echo "Restart = on-failure" >> /etc/systemd/system/frpc.service
         echo "RestartSec = 3" >> /etc/systemd/system/frpc.service
         echo "[Install]" >> /etc/systemd/system/frpc.service
@@ -140,13 +142,12 @@ case $option in
         read -p "Please input service type (tcp/udp): " service_type
         echo "Setting up..."
         cd /var/frp/conf
-        echo "[[proxies]]" >> frpc.toml
-        echo "name = \"$service_name\"" >> frpc.toml
-        echo "type = \"$service_type\"" >> frpc.toml
-        echo "localIP = \"127.0.0.1\"" >> frpc.toml
-        echo "localPort = $service_local_port" >> frpc.toml
-        echo "remotePort = $service_remote_port" >> frpc.toml
-        echo "Configuration file updated at /var/frp/conf/frpc.toml"
+        echo "[$service_name]" >> frpc.ini
+        echo "type = \"$service_type\"" >> frpc.ini
+        echo "local_ip = \"127.0.0.1\"" >> frpc.ini
+        echo "local_port = $service_local_port" >> frpc.ini
+        echo "remote_port = $service_remote_port" >> frpc.ini
+        echo "Configuration file updated at /var/frp/conf/frpc.ini"
         echo "Restart frp client service..."
         systemctl restart frpc
         echo "Service restarted."
