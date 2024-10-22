@@ -1,0 +1,1 @@
+"# frp-auto-script" 
