@@ -1,1 +1,1 @@
-"# frp-auto-script" 
+# frp-auto-script
